@@ -1,0 +1,16 @@
+CustomerID,Churn,Tenure,PreferredLoginDevice,CityTier,WarehouseToHome,PreferredPaymentMode,Gender,HourSpendOnApp,NumberOfDeviceRegistered,PreferedOrderCat,SatisfactionScore,MaritalStatus,NumberOfAddress,Complain,OrderAmountHikeFromlastYear,CouponUsed,OrderCount,DaySinceLastOrder,CashbackAmount
+CUST000001,0,45,Phone,1,25,COD,Male,3.5,2,Mobile,4,Married,3,0,15.2,3,8,5,150.5
+CUST000002,1,2,Phone,2,15,Cash on Delivery,Female,1.2,1,Fashion,2,Single,1,1,-5.8,0,1,28,25.3
+CUST000003,0,30,Computer,1,45,Credit Card,Male,5.0,3,Electronics,5,Married,4,0,25.5,5,12,3,380.0
+CUST000004,0,60,Tablet,2,30,Debit Card,Female,4.2,2,Grocery,4,Single,2,0,18.0,2,6,7,120.8
+CUST000005,1,5,Phone,3,60,COD,Male,2.0,1,Fashion,3,Divorced,1,1,-10.0,1,2,25,45.0
+CUST000006,0,90,Phone,1,20,UPI,Female,6.0,3,Mobile,5,Married,3,0,30.0,4,15,2,420.0
+CUST000007,0,40,Computer,2,35,Wallet,Male,3.8,2,Electronics,4,Single,2,0,12.5,2,7,8,190.5
+CUST000008,1,8,Phone,3,80,Cash on Delivery,Female,1.5,1,Fashion,2,Divorced,1,1,-15.0,0,1,20,30.0
+CUST000009,0,72,Tablet,1,18,COD,Male,5.5,3,Grocery,5,Married,4,0,22.0,5,10,4,280.0
+CUST000010,0,25,Phone,2,42,Credit Card,Female,4.0,2,Mobile,4,Single,2,0,18.5,3,9,6,210.0
+CUST000011,1,3,Phone,3,90,Debit Card,Male,0.8,1,Fashion,1,Single,1,1,-20.0,0,1,29,15.0
+CUST000012,0,55,Computer,1,28,UPI,Female,5.2,3,Electronics,5,Married,3,0,28.0,4,14,3,350.0
+CUST000013,0,35,Phone,2,38,Wallet,Male,3.2,2,Grocery,4,Single,2,0,14.0,2,8,9,160.0
+CUST000014,1,6,Phone,3,70,Cash on Delivery,Female,1.8,1,Fashion,2,Divorced,1,1,-8.0,1,2,22,40.0
+CUST000015,0,80,Tablet,1,22,COD,Male,6.0,3,Mobile,5,Married,4,0,35.0,5,16,2,450.0
