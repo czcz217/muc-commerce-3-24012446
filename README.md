@@ -1,65 +1,52 @@
-# 电商用户行为分析 Web 项目
-
-## 个人信息
-
-- 姓名：陈文卓
-- 学号：24012446
-
-## 项目结构
-
-```
-day07_24012446_陈文卓/
-├── app.py                    # Flask 主应用
-├── requirements.txt          # 依赖列表
-├── README.md                 # 项目说明
-├── data/                     # 数据文件
-│   ├── segment_analysis.csv  # 生命周期分析结果
-│   └── user_data.csv         # 用户数据
-├── services/                 # 服务模块
-│   ├── data_service.py       # 数据服务（指标卡、筛选）
-│   └── qa_service.py         # 问答服务（离线问答）
-├── static/
-│   └── images/               # 图表文件
-│       ├── 01_churn_bar.png
-│       └── 03_ordered_line.png
-├── templates/                # HTML 模板
-│   ├── login.html            # 登录页
-│   └── dashboard.html        # 看板页
-└── screenshots/              # 验收截图
-```
-
-## 核心功能
-
-1. **登录闭环** - 使用 Session 实现简化登录验证
-2. **数据看板** - 展示4张指标卡、2张图表、1张数据表
-3. **品类筛选** - 支持按偏好品类筛选数据
-4. **离线问答** - 支持4类问题：总体规模、流失情况、偏好品类、生命周期、订单情况
+# 第8天学生项目：Flask数据看板强化
 
 ## 运行方法
 
 ```bash
-# 安装依赖
-pip install -r requirements.txt
-
-# 运行项目
+python -m pip install -r requirements.txt
+python validate_day08_environment.py
 python app.py
-
-# 访问地址
-http://127.0.0.1:5000
-
-# 登录账号
-用户名: student
-密码: day07
 ```
 
-## 必选拓展
+浏览器访问 `http://127.0.0.1:5000`。
 
-### 拓展A：导出当前筛选结果
+- 用户名：`student`
+- 密码：`day07`
 
-- 新增 `/download` 路由，支持按品类导出 CSV
-- 使用方法：`http://127.0.0.1:5000/download?category=Fashion`
-- 导出的文件名包含所选品类信息
+## 第8天学习目标
 
-## 未解决问题
+本项目承接第7天的电商数据看板。请在原有页面、登录和问答功能基础上，完成新的路由、JSON接口、参数处理、错误响应和测试。
 
-无
+登录后重点测试：`/dashboard`、`/assistant`、`/health`、`/api/metrics`和`/api/categories?category=Fashion`。
+
+## 第8天核心TODO
+
+- `TODO 8-1`：完成`/api/metrics`指标JSON接口；
+- `TODO 8-2`：完成`/api/categories`的查询参数筛选；
+- `TODO 8-3`：统一400错误JSON结构；
+- `TODO 8-4`：检查数据服务返回值可被`jsonify`序列化；
+- 为新增接口编写至少3条Flask测试。
+
+## 提交方式
+
+不要新建GitHub仓库。继续使用第7天的课程仓库，在其中新增`day08_flask_upgrade/`目录，或按教师指定的第8天目录提交。提交前运行：
+
+```bash
+python validate_day08_environment.py
+python validate_day08_submission.py
+git status
+git add day08_flask_upgrade
+git diff --cached
+git commit -m "完成第8天Flask项目强化"
+git push
+```
+
+不要提交`.venv/`、`__pycache__/`、`.env`、真实密钥或其他缓存文件。
+
+## 学生信息
+
+- 姓名：陈文卓
+- 学号：24012446
+- 已完成路由或接口：/health、/api/metrics、/api/categories、/api/ask
+- 测试文件：tests/test_api.py（7条测试用例）
+- 尚未解决的问题：无
