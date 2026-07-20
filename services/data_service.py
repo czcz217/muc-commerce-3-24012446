@@ -1,69 +1,79 @@
+from pathlib import Path
+
 import pandas as pd
-import os
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
 
-def load_user_data():
-    file_path = os.path.join(DATA_DIR, 'user_data.csv')
-    return pd.read_csv(file_path)
+def _read_csv(path: Path) -> pd.DataFrame:
+    return pd.read_csv(path, encoding="utf-8-sig")
 
-def load_segment_data():
-    file_path = os.path.join(DATA_DIR, 'segment_analysis.csv')
-    return pd.read_csv(file_path)
 
-def get_filtered_dataframe(category='全部'):
-    df = load_user_data()
-    
-    if category != '全部':
-        df = df[df['PreferedOrderCat'] == category]
-    
-    return df
+def load_dashboard_data(base_dir: Path, selected_category: str = "全部") -> dict:
+    data_dir = base_dir / "data"
+    metrics_df = _read_csv(data_dir / "overall_metrics.csv")
+    category_df = _read_csv(data_dir / "category_analysis.csv")
+    segment_df = _read_csv(data_dir / "segment_analysis.csv")
 
-def get_metrics(df):
-    total_users = len(df)
-    churn_users = df['Churn'].sum()
-    churn_rate = (churn_users / total_users) * 100 if total_users > 0 else 0
-    avg_orders = df['OrderCount'].mean()
-    
+    metric_map = dict(zip(metrics_df["指标"], metrics_df["数值"]))
+    metrics = [
+        {"label": "总用户数", "value": f"{int(metric_map['用户数']):,}", "note": "人"},
+        {"label": "流失用户", "value": f"{int(metric_map['流失人数']):,}", "note": "人"},
+        {"label": "总体流失率", "value": f"{metric_map['流失率']:.1%}", "note": "用户占比"},
+        {"label": "平均订单数", "value": f"{metric_map['平均订单数']:.2f}", "note": "单/人"},
+    ]
+
+    categories = ["全部", *category_df["PreferedOrderCat"].tolist()]
+    table_df = category_df.copy()
+    if selected_category != "全部" and selected_category in categories:
+        table_df = table_df[table_df["PreferedOrderCat"] == selected_category]
+
+    table_df = table_df.rename(
+        columns={
+            "PreferedOrderCat": "偏好品类",
+            "用户数": "用户数",
+            "流失率": "流失率",
+            "平均订单数": "平均订单数",
+        }
+    )[["偏好品类", "用户数", "流失率", "平均订单数"]]
+    table_df["流失率"] = table_df["流失率"].map(lambda value: f"{value:.1%}")
+    table_df["平均订单数"] = table_df["平均订单数"].map(lambda value: f"{value:.2f}")
+
+    highest_risk = segment_df.loc[segment_df["流失率"].idxmax()]
+    insight = (
+        f"{highest_risk['TenureGroup']}的流失率最高，为{highest_risk['流失率']:.1%}。"
+        "这是一项描述性观察，不能直接解释流失原因。"
+    )
+
     return {
-        'total_users': int(total_users),
-        'churn_users': int(churn_users),
-        'churn_rate': round(churn_rate, 1),
-        'avg_orders': round(avg_orders, 1)
+        "metrics": metrics,
+        "categories": categories,
+        "category_rows": table_df.to_dict("records"),
+        "insight": insight,
     }
 
-def get_highest_risk_segment():
-    df = load_segment_data()
-    df['流失率'] = df['流失率'] * 100
-    highest_risk = df.loc[df['流失率'].idxmax()]
-    
-    return {
-        'segment': highest_risk['Tenure'],
-        'churn_rate': round(highest_risk['流失率'], 1),
-        'user_count': int(highest_risk['用户数']),
-        'churn_count': int(highest_risk['流失人数'])
-    }
 
-def get_category_options():
-    df = load_user_data()
-    categories = ['全部'] + sorted(df['PreferedOrderCat'].unique().tolist())
-    return categories
+def _convert_to_serializable(value):
+    """将numpy类型转换为Python原生类型，确保可被jsonify序列化。"""
+    import numpy as np
+    if isinstance(value, (np.integer, np.int32, np.int64)):
+        return int(value)
+    elif isinstance(value, (np.floating, np.float32, np.float64)):
+        return float(value)
+    elif isinstance(value, np.ndarray):
+        return value.tolist()
+    elif isinstance(value, dict):
+        return {k: _convert_to_serializable(v) for k, v in value.items()}
+    elif isinstance(value, (list, tuple)):
+        return [_convert_to_serializable(item) for item in value]
+    return value
 
-def get_table_data(df):
-    display_cols = ['CustomerID', 'PreferedOrderCat', 'OrderCount', 'CashbackAmount', 'Churn']
-    return df[display_cols].head(10).to_dict('records')
 
-def get_dashboard_data(category='全部'):
-    df = get_filtered_dataframe(category)
-    metrics = get_metrics(df)
-    highest_risk = get_highest_risk_segment()
-    categories = get_category_options()
-    table_data = get_table_data(df)
-    
-    return {
-        'metrics': metrics,
-        'highest_risk': highest_risk,
-        'categories': categories,
-        'table_data': table_data,
-        'filtered_count': len(df)
-    }
+def load_metric_api_data(base_dir: Path) -> list[dict]:
+    """返回给JSON接口使用的指标卡数据。"""
+    data = load_dashboard_data(base_dir)
+    return _convert_to_serializable(data["metrics"])
+
+
+def load_category_api_data(base_dir: Path, selected_category: str = "全部") -> list[dict]:
+    """返回给JSON接口使用的筛选表格数据。"""
+    data = load_dashboard_data(base_dir, selected_category)
+    return _convert_to_serializable(data["category_rows"])
