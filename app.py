@@ -1,82 +1,115 @@
-from flask import Flask, render_template, request, redirect, session, jsonify, send_file
-import os
-import io
-import pandas as pd
+from functools import wraps
+from pathlib import Path
+
+from flask import Flask, flash, jsonify, redirect, render_template, request, session, url_for
+
+from services.data_service import (
+    load_category_api_data,
+    load_dashboard_data,
+    load_metric_api_data,
+)
+from services.qa_service import answer_question
+
+
+BASE_DIR = Path(__file__).resolve().parent
 
 app = Flask(__name__)
-app.secret_key = 'day07_secret_key'
+app.config["SECRET_KEY"] = "day07-classroom-demo-key"
 
-from services import data_service, qa_service
 
-VALID_CREDENTIALS = {
-    'student': 'day07'
-}
+def login_required(view):
+    @wraps(view)
+    def wrapped_view(*args, **kwargs):
+        if "username" not in session:
+            flash("请先登录后再访问数据看板。", "warning")
+            return redirect(url_for("login"))
+        return view(*args, **kwargs)
 
-@app.route('/')
+    return wrapped_view
+
+
+@app.route("/")
 def index():
-    if 'username' in session:
-        return redirect('/dashboard')
-    return render_template('login.html', error=None)
+    return redirect(url_for("dashboard") if "username" in session else url_for("login"))
 
-@app.route('/login', methods=['POST'])
+
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    username = request.form.get('username')
-    password = request.form.get('password')
-    
-    if username in VALID_CREDENTIALS and VALID_CREDENTIALS[username] == password:
-        session['username'] = username
-        return redirect('/dashboard')
-    
-    return render_template('login.html', error='账号或密码错误')
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        if username == "student" and password == "day07":
+            session["username"] = username
+            flash("登录成功，欢迎进入电商用户分析系统。", "success")
+            return redirect(url_for("dashboard"))
+        flash("账号或密码错误。演示账号：student / day07", "danger")
+    return render_template("login.html")
 
-@app.route('/dashboard')
-def dashboard():
-    if 'username' not in session:
-        return redirect('/')
-    
-    category = request.args.get('category', '全部')
-    data = data_service.get_dashboard_data(category)
-    
-    return render_template('dashboard.html', 
-                           username=session['username'],
-                           category=category,
-                           **data)
 
-@app.route('/logout')
+@app.route("/logout")
 def logout():
-    session.pop('username', None)
-    return redirect('/')
+    session.clear()
+    flash("你已安全退出。", "success")
+    return redirect(url_for("login"))
 
-@app.route('/api/ask', methods=['POST'])
-def ask():
-    if 'username' not in session:
-        return jsonify({'error': '请先登录'}), 401
-    
-    question = request.json.get('question', '')
-    answer = qa_service.answer_question(question)
-    
-    return jsonify({'answer': answer})
 
-@app.route('/download')
-def download():
-    if 'username' not in session:
-        return redirect('/')
-    
-    category = request.args.get('category', '全部')
-    df = data_service.get_filtered_dataframe(category)
-    
-    output = io.StringIO()
-    df.to_csv(output, index=False, encoding='utf-8-sig')
-    output.seek(0)
-    
-    filename = f'user_data_{category}.csv'
-    
-    return send_file(
-        io.BytesIO(output.getvalue().encode('utf-8-sig')),
-        mimetype='text/csv',
-        as_attachment=True,
-        download_name=filename
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    category = request.args.get("category", "全部")
+    dashboard_data = load_dashboard_data(BASE_DIR, category)
+    return render_template(
+        "dashboard.html",
+        username=session["username"],
+        selected_category=category,
+        **dashboard_data,
     )
 
-if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port=5000)
+
+@app.route("/assistant")
+@login_required
+def assistant():
+    return render_template("assistant.html", username=session["username"])
+
+
+@app.route("/api/ask", methods=["POST"])
+@login_required
+def ask():
+    payload = request.get_json(silent=True) or {}
+    question = str(payload.get("question", "")).strip()
+    if not question:
+        return jsonify({"ok": False, "error": "请输入一个与项目数据有关的问题。"}), 400
+    return jsonify({"ok": True, "answer": answer_question(BASE_DIR, question)})
+
+
+@app.route("/health")
+def health():
+    """用于确认服务是否存活，不需要登录。"""
+    return jsonify({"ok": True, "service": "day08-flask-upgrade"})
+
+
+@app.route("/api/metrics")
+@login_required
+def metrics_api():
+    return jsonify({"ok": True, "metrics": load_metric_api_data(BASE_DIR)})
+
+
+@app.route("/api/categories")
+@login_required
+def categories_api():
+    category = request.args.get("category", "全部")
+    return jsonify({"ok": True, "category": category, "rows": load_category_api_data(BASE_DIR, category)})
+
+
+@app.errorhandler(400)
+def bad_request(_error):
+    return jsonify({"ok": False, "error": "请求格式不正确。"}), 400
+
+
+@app.errorhandler(404)
+def page_not_found(_error):
+    return render_template("404.html"), 404
+
+
+if __name__ == "__main__":
+    app.run(debug=False, port=5500)
