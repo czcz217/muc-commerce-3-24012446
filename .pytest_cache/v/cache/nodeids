@@ -1,0 +1,9 @@
+[
+  "tests/test_api.py::test_ask_api_empty_question",
+  "tests/test_api.py::test_categories_api_with_filter",
+  "tests/test_api.py::test_categories_api_with_login",
+  "tests/test_api.py::test_categories_api_without_login",
+  "tests/test_api.py::test_health_endpoint",
+  "tests/test_api.py::test_metrics_api_with_login",
+  "tests/test_api.py::test_metrics_api_without_login"
+]
