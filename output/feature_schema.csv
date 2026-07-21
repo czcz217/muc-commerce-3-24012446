@@ -1,0 +1,9 @@
+feature_name,feature_type,processing
+HourSpendOnApp,numeric,StandardScaler
+Complain,numeric,StandardScaler
+CashbackAmount,numeric,StandardScaler
+PreferredLoginDevice,categorical,OneHotEncoder
+PreferredPaymentMode,categorical,OneHotEncoder
+Gender,categorical,OneHotEncoder
+PreferedOrderCat,categorical,OneHotEncoder
+MaritalStatus,categorical,OneHotEncoder
