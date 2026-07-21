@@ -1,52 +1,48 @@
-# 第8天学生项目：Flask数据看板强化
+# Day 09 机器学习入门实训
 
-## 运行方法
+## 个人信息
+
+- **姓名**：陈文卓
+- **学号**：24012446
+
+## 核心内容
+
+### 四个问题回答
+
+1. **机器学习怎样利用历史数据？**
+   - 通过分析历史数据中的模式和规律，自动学习特征与目标之间的映射关系
+
+2. **什么是特征和标签？**
+   - 特征：描述样本的属性，是模型输入的信息
+   - 标签：模型要预测的目标变量
+
+3. **为什么要分训练集和测试集？**
+   - 评估模型的泛化能力，避免过度拟合
+
+4. **为什么准确率高不一定代表模型有用？**
+   - 数据不平衡时准确率产生误导，如83%准确率但召回率为0
+
+### 完成的任务
+
+1. **任务1**：数据验收 - 5630行、22列、无缺失、流失率16.84%
+2. **任务2**：填写建模口径 - TARGET=Churn, ID_COL=CustomerID
+3. **任务3**：特征方案 - 数值列15个，类别列6个
+4. **任务4**：分层划分 - 使用stratify=y保持流失比例一致
+5. **任务5**：预处理流水线 - 转换后36列，无缺失值
+6. **任务6**：最低参照线 - 准确率83.13%，召回率0%
+
+### 成果文件
+
+- `output/feature_schema.csv`：字段角色与处理方式
+- `output/split_summary.csv`：训练集和测试集规模、流失比例
+- `output/model_matrix_preview.csv`：模型输入矩阵前20行
+- `output/baseline_metrics.csv`：最低参照线的三项结果
+
+## 运行方式
 
 ```bash
-python -m pip install -r requirements.txt
-python validate_day08_environment.py
-python app.py
+pip install pandas numpy scikit-learn
+python run_day09.py
 ```
 
-浏览器访问 `http://127.0.0.1:5000`。
-
-- 用户名：`student`
-- 密码：`day07`
-
-## 第8天学习目标
-
-本项目承接第7天的电商数据看板。请在原有页面、登录和问答功能基础上，完成新的路由、JSON接口、参数处理、错误响应和测试。
-
-登录后重点测试：`/dashboard`、`/assistant`、`/health`、`/api/metrics`和`/api/categories?category=Fashion`。
-
-## 第8天核心TODO
-
-- `TODO 8-1`：完成`/api/metrics`指标JSON接口；
-- `TODO 8-2`：完成`/api/categories`的查询参数筛选；
-- `TODO 8-3`：统一400错误JSON结构；
-- `TODO 8-4`：检查数据服务返回值可被`jsonify`序列化；
-- 为新增接口编写至少3条Flask测试。
-
-## 提交方式
-
-不要新建GitHub仓库。继续使用第7天的课程仓库，在其中新增`day08_flask_upgrade/`目录，或按教师指定的第8天目录提交。提交前运行：
-
-```bash
-python validate_day08_environment.py
-python validate_day08_submission.py
-git status
-git add day08_flask_upgrade
-git diff --cached
-git commit -m "完成第8天Flask项目强化"
-git push
-```
-
-不要提交`.venv/`、`__pycache__/`、`.env`、真实密钥或其他缓存文件。
-
-## 学生信息
-
-- 姓名：陈文卓
-- 学号：24012446
-- 已完成路由或接口：/health、/api/metrics、/api/categories、/api/ask
-- 测试文件：tests/test_api.py（7条测试用例）
-- 尚未解决的问题：无
+或使用Jupyter Notebook打开 `Day09_机器学习入门.ipynb` 运行所有单元格。
